@@ -1,0 +1,4 @@
+# Netlify reads this file from the published folder (frontend/).
+# It forwards /api/* to the Render server so the browser sees ONE site: no CORS, and the login cookie works.
+# 1) Replace YOUR-SERVICE with your Render service name.   2) Keep the "200" (a rewrite, not a redirect).
+/api/*  https://maison-backend-4kp2.onrender.com 200
