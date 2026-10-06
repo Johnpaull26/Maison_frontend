@@ -195,9 +195,14 @@ select {
   justify-content: center;
 }
 .halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 510px;
   height: 510px;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
+  pointer-events: none;
   background: radial-gradient(
     circle,
     rgba(184, 155, 114, 0.23),
@@ -205,63 +210,14 @@ select {
     transparent 70%
   );
 }
-.bottle {
-  position: absolute;
-  width: 280px;
-  height: 490px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-.bottle .cap {
-  position: absolute;
-  top: 22px;
-  width: 78px;
-  height: 62px;
-  border-radius: 7px;
-  background: #2c2621;
-  z-index: 2;
-}
-.bottle .neck {
-  position: absolute;
-  top: 75px;
-  width: 100px;
-  height: 70px;
-  background: #b89b72;
-  border: 3px solid #927751;
+.hero-product {
+  position: relative;
   z-index: 1;
-}
-.bottle-body {
-  width: 245px;
-  height: 355px;
-  border: 4px solid rgba(184, 155, 114, 0.65);
-  border-radius: 55px 55px 42px 42px;
-  background: linear-gradient(
-    120deg,
-    rgba(255, 255, 255, 0.8),
-    rgba(184, 155, 114, 0.34),
-    rgba(43, 34, 27, 0.22)
-  );
-  box-shadow: 30px 35px 55px rgba(50, 38, 28, 0.22);
-  display: grid;
-  place-items: center;
-}
-.bottle-body div {
-  width: 178px;
-  height: 118px;
-  background: rgba(247, 243, 237, 0.94);
-  display: grid;
-  place-items: center;
-  text-align: center;
-  font-family: var(--serif);
-  font-size: 22px;
-  letter-spacing: 3px;
-  line-height: 1.25;
-  box-shadow: 0 10px 22px rgba(30, 22, 18, 0.12);
-}
-.bottle-body em {
-  font-size: 25px;
-  color: var(--gold2);
+  display: block;
+  width: min(100%, 460px);
+  max-height: min(75vh, 600px);
+  object-fit: contain;
+  mix-blend-mode: multiply;
 }
 .spark {
   position: absolute;
@@ -555,54 +511,20 @@ select {
 .about-art:before {
   content: "";
   position: absolute;
+  z-index: 0;
   width: 470px;
   height: 470px;
   border: 1px solid rgba(184, 155, 114, 0.5);
   border-radius: 50%;
 }
-.about-art > b {
-  position: absolute;
-  bottom: 50px;
-  font-family: var(--serif);
-  font-size: 80px;
-  letter-spacing: 0.15em;
-  color: rgba(33, 28, 24, 0.08);
-}
-.about-bottle {
-  width: 210px;
-  height: 310px;
-  border-radius: 48px 48px 34px 34px;
-  background: linear-gradient(115deg, #fff7eb, #b89b72 65%, #59473a);
-  border: 4px solid #a68a64;
-  box-shadow: 25px 30px 50px rgba(47, 35, 25, 0.2);
+.about-product {
   position: relative;
-}
-.about-bottle:before {
-  content: "";
-  position: absolute;
-  width: 80px;
-  height: 65px;
-  background: #2b2521;
-  left: 61px;
-  top: -70px;
-  border-radius: 7px;
-}
-.about-bottle span {
-  position: absolute;
-  left: 22px;
-  right: 22px;
-  top: 110px;
-  height: 90px;
-  background: #f7f3ed;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  font-family: var(--serif);
-  font-size: 20px;
-  letter-spacing: 2px;
-}
-.about-bottle em {
-  color: var(--gold2);
+  z-index: 1;
+  display: block;
+  width: min(100%, 350px);
+  max-height: min(78vh, 430px);
+  object-fit: contain;
+  mix-blend-mode: multiply;
 }
 .about-copy > p:not(.eyebrow) {
   font-size: 19px;
@@ -853,12 +775,9 @@ footer a {
     width: 360px;
     height: 360px;
   }
-  .bottle-body {
-    width: 185px;
-    height: 280px;
-  }
-  .bottle {
-    height: 400px;
+  .hero-product {
+    width: min(100%, 380px);
+    max-height: min(68vh, 460px);
   }
   .top-grid,
   .product-grid {
@@ -1465,6 +1384,7 @@ footer div small {
 .orbit-2 { width: 540px; height: 540px; border-style: dashed; animation-direction: reverse, normal; animation-duration: 22s, 1.6s; }
 @keyframes opSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 @keyframes opFade { from { opacity: 0; } }
+.opening-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
 /* the bottle assembles piece by piece */
 .opening-bottle { position: relative; width: 120px; height: 190px; margin: 0 auto 34px; display: flex; flex-direction: column; align-items: center; }
 .opening-bottle > span { display: block; opacity: 0; animation: opRise .9s cubic-bezier(.22, 1, .36, 1) forwards; }
@@ -1472,7 +1392,11 @@ footer div small {
 .opening-neck { width: 18px; height: 14px; background: #927751; animation-delay: .7s !important; }
 .opening-body { width: 100px; height: 120px; border: 2px solid rgba(255, 255, 255, .55); border-radius: 26px;
   background: linear-gradient(130deg, rgba(255, 255, 255, .28), rgba(184, 155, 114, .35)); animation-delay: .3s !important; }
-.opening-label { position: absolute; bottom: 38px; font: 15px Georgia, serif; letter-spacing: .3em; padding-left: .3em; animation-delay: 1.3s !important; }
+.opening-label { position: absolute; left: 8px; right: 8px; top: 44px; bottom: 26px; display: flex !important;
+  flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font: 15px Georgia, serif; letter-spacing: .3em; animation-delay: 1.3s !important; }
+.opening-label small { font: 7px Georgia, serif; letter-spacing: .2em; }
+.opening-label strong { font: 15px Georgia, serif; letter-spacing: .18em; }
 @keyframes opRise { from { opacity: 0; transform: translateY(18px) scale(.96); } to { opacity: 1; transform: none; } }
 .opening-copy small { display: block; letter-spacing: .32em; font-size: 12px; color: #cdb187; opacity: 0; animation: opRise 1s 1.5s forwards; }
 .opening-copy h2 { font: 400 clamp(34px, 6vw, 62px) Georgia, serif; margin: 12px 0; opacity: 0; animation: opTrack 1.8s 1.7s cubic-bezier(.22, 1, .36, 1) forwards; }
