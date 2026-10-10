@@ -158,6 +158,8 @@
     me: () => cache.me,
     async refreshSession() { cache.me = (await api("GET", "/auth/me")).account; return cache.me; },
     sendOtp: (email) => api("POST", "/auth/send-otp", { email }), // the server emails a code; it is never sent back here
+    sendResetOtp: (email) => api("POST", "/auth/send-reset-otp", { email }),
+    resetPassword: (email, otp, password) => api("POST", "/auth/reset-password", { email, otp, password }),
     async login(email, password, otp) {
       cache.me = (await api("POST", "/auth/login", { email, password, otp })).account;
       return cache.me;

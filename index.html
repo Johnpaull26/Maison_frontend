@@ -125,9 +125,10 @@
         </div>
         <div class="contacts">
           <div><small>Owner</small><strong>Arren Coyoca</strong></div>
-          <div><small>Location</small><strong>5 Network Ave. Street, Meralco Village, Brgy. Lias, Marilao,
-              Bulacan</strong></div>
-              <div><small>Facebook</small><a href="https://www.facebook.com/maisonreve" target="_blank" rel="noopener noreferrer">
+          <div><small>Location</small> <a href="https://www.google.com/maps/place/Casea+Business+Process+Outsourcing+Services/@14.7597105,120.9615797,19z/data=!4m9!1m2!2m1!1s5+Network+Ave.+Street,+Meralco+Village,+Brgy.+Lias,+Marilao,+Bulacan!3m5!1s0x3397b36fc1aa7271:0xbf6ec3e606e95bf9!8m2!3d14.7597103!4d120.962422!16s%2Fg%2F11vyqmd69w?entry=ttu&g_ep=EgoyMDI2MTAwNS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">
+            <strong>5 Network Ave. Street, Meralco Village, Brgy. Lias, Marilao,
+              Bulacan</strong></a></div>
+              <div><small>Facebook</small><a href="https://www.facebook.com/profile.php?id=61594267620038" target="_blank" rel="noopener noreferrer">
                 <strong>MAISON RÉVE</strong></a></div>
           <div><small>Customers</small><strong>Students & fragrance enthusiasts</strong></div>
         </div>
@@ -152,7 +153,7 @@
           <div><small>SIZE</small><strong id="ms"></strong></div>
           <div><small>STOCK LEFT</small><strong id="mst"></strong></div>
         </div>
-        <p class="view-only">Product viewing only — no cart, checkout, or POS ordering is available.</p>
+        <p class="view-only">Product viewing only — Contact them in their facebook page for purchasing options.</p>
       </div>
     </div>
   </div>
@@ -167,24 +168,50 @@
       <div class="lg-brand">Maison Réve</div>
       <p class="lg-eyebrow">RESTRICTED ADMINISTRATIVE ACCESS</p>
       <h2 id="lgTitle">Welcome back.</h2>
-      <p class="lg-sub">Enter your administrator email and password, then verify the one-time code.</p>
-      <form id="lgForm" novalidate>
-        <label>Email address
-          <input id="lgEmail" type="email" placeholder="admin@maisonreve.com" required autocomplete="username">
-        </label>
-        <label>Password
-          <input id="lgPassword" type="password" placeholder="Enter password" required autocomplete="current-password">
-        </label>
-        <div class="lg-otp-row">
-          <label>OTP verification code
-            <input id="lgOtp" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" required autocomplete="one-time-code">
+      <p id="lgSub" class="lg-sub">Enter your administrator email and password, then verify the one-time code.</p>
+      <div id="lgSignInView">
+        <form id="lgForm" novalidate>
+          <label>Email address
+            <input id="lgEmail" type="email" placeholder="admin@maisonreve.com" required autocomplete="username">
           </label>
-          <button type="button" id="lgSendOtp" class="lg-secondary">Send OTP</button>
-        </div>
-        <div id="lgOtpStatus" class="lg-otp-status" aria-live="polite"></div>
-        <button type="submit" class="lg-primary">Verify &amp; Sign In</button>
-        <p id="lgError" class="lg-error" aria-live="polite"></p>
-      </form>
+          <label>Password
+            <input id="lgPassword" type="password" placeholder="Enter password" required autocomplete="current-password">
+          </label>
+          <div class="lg-otp-row">
+            <label>OTP verification code
+              <input id="lgOtp" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" required autocomplete="one-time-code">
+            </label>
+            <button type="button" id="lgSendOtp" class="lg-secondary">Send OTP</button>
+          </div>
+          <div id="lgOtpStatus" class="lg-otp-status" aria-live="polite"></div>
+          <button type="submit" class="lg-primary">Verify &amp; Sign In</button>
+          <p id="lgError" class="lg-error" aria-live="polite"></p>
+        </form>
+        <button type="button" id="lgForgotPassword" class="lg-forgot">Forgot password?</button>
+      </div>
+      <div id="lgResetView" hidden>
+        <form id="lgResetForm" novalidate>
+          <label>Email address
+            <input id="lgResetEmail" type="email" placeholder="admin@maisonreve.com" required autocomplete="email">
+          </label>
+          <div class="lg-otp-row">
+            <label>Password reset code
+              <input id="lgResetOtp" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" required autocomplete="one-time-code">
+            </label>
+            <button type="button" id="lgSendResetOtp" class="lg-secondary">Send code</button>
+          </div>
+          <div id="lgResetOtpStatus" class="lg-otp-status" aria-live="polite"></div>
+          <label>New password
+            <input id="lgNewPassword" type="password" minlength="6" maxlength="40" required autocomplete="new-password">
+          </label>
+          <label>Confirm new password
+            <input id="lgConfirmPassword" type="password" minlength="6" maxlength="40" required autocomplete="new-password">
+          </label>
+          <button type="submit" class="lg-primary">Reset password</button>
+          <p id="lgResetError" class="lg-error" aria-live="polite"></p>
+        </form>
+        <button type="button" id="lgBackToSignIn" class="lg-forgot">Back to sign in</button>
+      </div>
     </div>
   </div>
   <!-- WELCOME TRANSITION (plays after a successful login) -->

@@ -682,7 +682,7 @@ footer a {
 .modal-copy > .family {
   margin-bottom: 20px;
 }
-.modal-copy > p:not(.eyebrow):not(.view-only) {
+.modal-copy > p:not(.eyebrow) {
   font-size: 19px;
   color: var(--taupe);
   margin: 25px 0;
@@ -715,11 +715,6 @@ footer a {
 }
 .meta strong {
   font-size: 21px;
-}
-.view-only {
-  color: var(--gold2) !important;
-  font-size: 15px !important;
-  font-weight: 700;
 }
 @media (max-width: 1100px) {
   .top-grid {
@@ -1184,6 +1179,25 @@ footer div small {
 }
 .lg-primary:hover {
   background: #3a312a;
+}
+.lg-forgot {
+  display: block;
+  margin: 10px auto 0;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--espresso);
+  font: 700 14px var(--sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.lg-forgot:hover {
+  color: var(--gold2);
+}
+.lg-forgot:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
 .lg-demo {
   margin: 10px 0 0;

@@ -244,7 +244,18 @@ document.addEventListener("DOMContentLoaded", () => {
     otp: document.querySelector("#lgOtp"),
     status: document.querySelector("#lgOtpStatus"),
     error: document.querySelector("#lgError"),
+    resetView: document.querySelector("#lgResetView"),
+    resetForm: document.querySelector("#lgResetForm"),
+    resetEmail: document.querySelector("#lgResetEmail"),
+    resetOtp: document.querySelector("#lgResetOtp"),
+    resetStatus: document.querySelector("#lgResetOtpStatus"),
+    newPassword: document.querySelector("#lgNewPassword"),
+    confirmPassword: document.querySelector("#lgConfirmPassword"),
+    resetError: document.querySelector("#lgResetError"),
   };
+  const lgSignInView = document.querySelector("#lgSignInView");
+  const lgTitle = document.querySelector("#lgTitle");
+  const lgSub = document.querySelector("#lgSub");
   const lgBackdrop = lg.overlay.querySelector(".lg-backdrop");
   let lgBusy = false;
   let lgSubmitting = false;
@@ -252,9 +263,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetLoginForm() {
     lg.form.reset();
+    lg.resetForm.reset();
+    lg.resetView.hidden = true;
+    lgSignInView.hidden = false;
+    lgTitle.textContent = "Welcome back.";
+    lgSub.textContent = "Enter your administrator email and password, then verify the one-time code.";
     lg.status.textContent = "";
     lg.status.className = "lg-otp-status";
     lg.error.textContent = "";
+    lg.resetStatus.textContent = "";
+    lg.resetStatus.className = "lg-otp-status";
+    lg.resetError.textContent = "";
+  }
+
+  function showPasswordReset() {
+    lg.resetEmail.value = lg.email.value.trim();
+    lg.error.textContent = "";
+    lgSignInView.hidden = true;
+    lg.resetView.hidden = false;
+    lgTitle.textContent = "Reset your password.";
+    lgSub.textContent = "We’ll email a one-time code to your administrator address.";
+    lg.resetEmail.focus();
+  }
+
+  function showSignIn() {
+    lg.email.value = lg.resetEmail.value.trim();
+    lg.resetView.hidden = true;
+    lgSignInView.hidden = false;
+    lgTitle.textContent = "Welcome back.";
+    lgSub.textContent = "Enter your administrator email and password, then verify the one-time code.";
+    lg.password.focus();
   }
 
   function openLogin() {
@@ -289,6 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.querySelector("#lgClose").addEventListener("click", closeLogin);
+  document.querySelector("#lgForgotPassword").addEventListener("click", showPasswordReset);
+  document.querySelector("#lgBackToSignIn").addEventListener("click", showSignIn);
   lg.overlay.addEventListener("click", (e) => {
     if (e.target === lg.overlay || e.target === lgBackdrop) closeLogin();
   });
@@ -317,6 +357,52 @@ document.addEventListener("DOMContentLoaded", () => {
       lg.status.className = "lg-otp-status bad";
     } finally {
       sendBtn.disabled = false;
+    }
+  });
+
+  document.querySelector("#lgSendResetOtp").addEventListener("click", async (e) => {
+    const button = e.currentTarget;
+    const email = lg.resetEmail.value.trim();
+    if (!email) {
+      lg.resetStatus.textContent = "Enter your administrator email first.";
+      lg.resetStatus.className = "lg-otp-status bad";
+      return;
+    }
+    button.disabled = true;
+    lg.resetStatus.textContent = "Sending the code…";
+    lg.resetStatus.className = "lg-otp-status";
+    try {
+      const r = await Store.sendResetOtp(email);
+      lg.resetStatus.textContent = r.message;
+      lg.resetStatus.className = "lg-otp-status good";
+    } catch (err) {
+      lg.resetStatus.textContent = err.message;
+      lg.resetStatus.className = "lg-otp-status bad";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  lg.resetForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    lg.resetError.textContent = "";
+    if (lg.newPassword.value !== lg.confirmPassword.value) {
+      lg.resetError.textContent = "The passwords do not match.";
+      return;
+    }
+    const submit = lg.resetForm.querySelector('[type="submit"]');
+    submit.disabled = true;
+    try {
+      const r = await Store.resetPassword(lg.resetEmail.value.trim(), lg.resetOtp.value.trim(), lg.newPassword.value);
+      showSignIn();
+      lg.password.value = "";
+      lg.otp.value = "";
+      lg.status.textContent = r.message;
+      lg.status.className = "lg-otp-status good";
+    } catch (err) {
+      lg.resetError.textContent = err.message;
+    } finally {
+      submit.disabled = false;
     }
   });
 
