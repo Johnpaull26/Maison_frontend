@@ -257,6 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const lgTitle = document.querySelector("#lgTitle");
   const lgSub = document.querySelector("#lgSub");
   const lgBackdrop = lg.overlay.querySelector(".lg-backdrop");
+  const passwordToggles = [...lg.overlay.querySelectorAll(".lg-password-toggle")];
   let lgBusy = false;
   let lgSubmitting = false;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -264,6 +265,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function resetLoginForm() {
     lg.form.reset();
     lg.resetForm.reset();
+    passwordToggles.forEach((toggle) => {
+      const input = document.getElementById(toggle.getAttribute("aria-controls"));
+      input.type = "password";
+      toggle.textContent = "Show";
+      toggle.setAttribute("aria-label", "Show password");
+      toggle.setAttribute("aria-pressed", "false");
+    });
     lg.resetView.hidden = true;
     lgSignInView.hidden = false;
     lgTitle.textContent = "Welcome back.";
@@ -329,6 +337,16 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#lgClose").addEventListener("click", closeLogin);
   document.querySelector("#lgForgotPassword").addEventListener("click", showPasswordReset);
   document.querySelector("#lgBackToSignIn").addEventListener("click", showSignIn);
+  passwordToggles.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const input = document.getElementById(toggle.getAttribute("aria-controls"));
+      const isVisible = input.type === "text";
+      input.type = isVisible ? "password" : "text";
+      toggle.textContent = isVisible ? "Show" : "Hide";
+      toggle.setAttribute("aria-label", `${isVisible ? "Show" : "Hide"} password`);
+      toggle.setAttribute("aria-pressed", String(!isVisible));
+    });
+  });
   lg.overlay.addEventListener("click", (e) => {
     if (e.target === lg.overlay || e.target === lgBackdrop) closeLogin();
   });
