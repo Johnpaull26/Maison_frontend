@@ -1,3 +1,4 @@
+/* Shared colors, fonts, and sizes used across the storefront. */
 :root {
   --ivory: #f7f3ed;
   --cream: #efe8de;
@@ -70,6 +71,7 @@ input,
 select {
   font: inherit;
 }
+/* Keeps the main navigation visible while the page scrolls. */
 .header {
   position: sticky;
   top: 0;
@@ -128,10 +130,12 @@ select {
 .system-mark b {
   color: var(--gold);
 }
+/* Gives each main page section consistent spacing and positioning. */
 .section {
   padding: 105px 7%;
   position: relative;
 }
+/* Places the welcome text beside the product image. */
 .hero {
   min-height: calc(100vh - 94px);
   display: grid;
@@ -304,15 +308,11 @@ select {
   color: var(--taupe);
   text-transform: uppercase;
 }
+/* Styles the featured fragrance section and its product cards. */
 .best {
   background: linear-gradient(145deg, #efe5d7, #f8f4ee 58%, #e9dfd2);
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-}
-.top-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 18px;
 }
 .top-card {
   background: rgba(255, 255, 255, 0.7);
@@ -368,6 +368,7 @@ select {
   font-weight: 800;
   font-size: 20px;
 }
+/* Styles the fragrance search, filter, and product list. */
 .fragrance {
   background: var(--ivory);
 }
@@ -494,6 +495,7 @@ select {
   font-size: 34px;
   font-weight: 400;
 }
+/* Arranges the brand story, contact details, and footer content. */
 .about {
   display: grid;
   grid-template-columns: 0.85fr 1.15fr;
@@ -626,6 +628,7 @@ footer a {
   font-weight: 700;
   color: var(--gold2);
 }
+/* Shows product details in a centered overlay above the page. */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -717,9 +720,6 @@ footer a {
   font-size: 21px;
 }
 @media (max-width: 1100px) {
-  .top-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
   .product-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -774,7 +774,6 @@ footer a {
     width: min(100%, 380px);
     max-height: min(68vh, 460px);
   }
-  .top-grid,
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -849,74 +848,11 @@ footer a {
   .hero-art {
     min-height: 350px;
   }
-  .top-grid,
   .product-grid {
-    grid-template-columns: 1fr;
-  }
-  .modal-meta {
     grid-template-columns: 1fr;
   }
 }
 
-/* ==========================================================
-   MAISON RÉVE LOGO CUSTOMIZATION
-   Change these variables to customize the logo inside both
-   perfume bottles without editing the layout.
-   ========================================================== */
-:root {
-  --bottle-logo-main: #211c18;
-  --bottle-logo-accent: #b89b72;
-  --bottle-logo-size: 22px;
-  --bottle-logo-letter-spacing: 2.5px;
-}
-.bottle-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-family: Georgia, "Times New Roman", serif;
-  line-height: 1.05;
-  letter-spacing: var(--bottle-logo-letter-spacing);
-  color: var(--bottle-logo-main);
-  font-size: var(--bottle-logo-size);
-  font-weight: 400;
-}
-.bottle-logo .logo-main {
-  font-size: 1em;
-}
-.bottle-logo .logo-accent {
-  font-size: 1.12em;
-  color: var(--bottle-logo-accent);
-  font-style: italic;
-}
-.bottle-logo small {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 8px;
-  letter-spacing: 3px;
-  margin-top: 7px;
-  color: #756b61;
-}
-.secret-click-hint {
-  position: fixed;
-  top: 101px;
-  left: 50%;
-  transform: translate(-50%, -8px);
-  background: #211c18;
-  color: #fff;
-  padding: 8px 14px;
-  border: 1px solid #b89b72;
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  opacity: 0;
-  pointer-events: none;
-  transition: 0.2s;
-  z-index: 30;
-}
-.secret-click-hint.visible {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
 footer div {
   display: flex;
   gap: 22px;
@@ -1224,24 +1160,6 @@ footer div small {
 .lg-forgot:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
-}
-.lg-demo {
-  margin: 10px 0 0;
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: var(--taupe);
-}
-.lg-demo-otp {
-  margin-top: 10px;
-  padding: 10px 12px;
-  background: var(--cream);
-  border-left: 3px solid var(--gold);
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 0.1em;
-}
-.lg-demo-otp[hidden] {
-  display: none;
 }
 .lg-error {
   margin: 8px 0 0;

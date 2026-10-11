@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ---------- FLOATING LOGIN PANEL ----------
-  const lg = {
+  const loginElements = {
     overlay: document.querySelector("#lgOverlay"),
     form: document.querySelector("#lgForm"),
     email: document.querySelector("#lgEmail"),
@@ -253,18 +253,19 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmPassword: document.querySelector("#lgConfirmPassword"),
     resetError: document.querySelector("#lgResetError"),
   };
-  const lgSignInView = document.querySelector("#lgSignInView");
-  const lgTitle = document.querySelector("#lgTitle");
-  const lgSub = document.querySelector("#lgSub");
-  const lgBackdrop = lg.overlay.querySelector(".lg-backdrop");
-  const passwordToggles = [...lg.overlay.querySelectorAll(".lg-password-toggle")];
-  let lgBusy = false;
-  let lgSubmitting = false;
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const signInView = document.querySelector("#lgSignInView");
+  const loginTitle = document.querySelector("#lgTitle");
+  const loginSubtitle = document.querySelector("#lgSub");
+  const loginBackdrop = loginElements.overlay.querySelector(".lg-backdrop");
+  const passwordToggles = [...loginElements.overlay.querySelectorAll(".lg-password-toggle")];
+  let loginIsBusy = false;
+  let loginIsSubmitting = false;
+  const shouldReduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Clears both forms and puts the login panel back in its starting state.
   function resetLoginForm() {
-    lg.form.reset();
-    lg.resetForm.reset();
+    loginElements.form.reset();
+    loginElements.resetForm.reset();
     passwordToggles.forEach((toggle) => {
       const input = document.getElementById(toggle.getAttribute("aria-controls"));
       input.type = "password";
@@ -272,71 +273,76 @@ document.addEventListener("DOMContentLoaded", () => {
       toggle.setAttribute("aria-label", "Show password");
       toggle.setAttribute("aria-pressed", "false");
     });
-    lg.resetView.hidden = true;
-    lgSignInView.hidden = false;
-    lgTitle.textContent = "Welcome back.";
-    lgSub.textContent = "Enter your administrator email and password, then verify the one-time code.";
-    lg.status.textContent = "";
-    lg.status.className = "lg-otp-status";
-    lg.error.textContent = "";
-    lg.resetStatus.textContent = "";
-    lg.resetStatus.className = "lg-otp-status";
-    lg.resetError.textContent = "";
+    loginElements.resetView.hidden = true;
+    signInView.hidden = false;
+    loginTitle.textContent = "Welcome back.";
+    loginSubtitle.textContent = "Enter your administrator email and password, then verify the one-time code.";
+    loginElements.status.textContent = "";
+    loginElements.status.className = "lg-otp-status";
+    loginElements.error.textContent = "";
+    loginElements.resetStatus.textContent = "";
+    loginElements.resetStatus.className = "lg-otp-status";
+    loginElements.resetError.textContent = "";
   }
 
+  // Switches the panel from sign-in to password reset and carries over the email.
   function showPasswordReset() {
-    lg.resetEmail.value = lg.email.value.trim();
-    lg.error.textContent = "";
-    lgSignInView.hidden = true;
-    lg.resetView.hidden = false;
-    lgTitle.textContent = "Reset your password.";
-    lgSub.textContent = "We’ll email a one-time code to your administrator address.";
-    lg.resetEmail.focus();
+    loginElements.resetEmail.value = loginElements.email.value.trim();
+    loginElements.error.textContent = "";
+    signInView.hidden = true;
+    loginElements.resetView.hidden = false;
+    loginTitle.textContent = "Reset your password.";
+    loginSubtitle.textContent = "We’ll email a one-time code to your administrator address.";
+    loginElements.resetEmail.focus();
   }
 
+  // Returns to sign-in and puts the reset email into the email field.
   function showSignIn() {
-    lg.email.value = lg.resetEmail.value.trim();
-    lg.resetView.hidden = true;
-    lgSignInView.hidden = false;
-    lgTitle.textContent = "Welcome back.";
-    lgSub.textContent = "Enter your administrator email and password, then verify the one-time code.";
-    lg.password.focus();
+    loginElements.email.value = loginElements.resetEmail.value.trim();
+    loginElements.resetView.hidden = true;
+    signInView.hidden = false;
+    loginTitle.textContent = "Welcome back.";
+    loginSubtitle.textContent = "Enter your administrator email and password, then verify the one-time code.";
+    loginElements.password.focus();
   }
 
+  // Opens the login panel with an animation and focuses the email field.
   function openLogin() {
-    if (lgBusy || lg.overlay.classList.contains("active")) return;
-    lgBusy = true;
-    const r = secretLogo.getBoundingClientRect();
-    lg.overlay.style.setProperty("--ox", r.left + r.width / 2 + "px");
-    lg.overlay.style.setProperty("--oy", r.top + r.height / 2 + "px");
+    if (loginIsBusy || loginElements.overlay.classList.contains("active")) return;
+    loginIsBusy = true;
+    const logoPosition = secretLogo.getBoundingClientRect();
+    loginElements.overlay.style.setProperty("--ox", logoPosition.left + logoPosition.width / 2 + "px");
+    loginElements.overlay.style.setProperty("--oy", logoPosition.top + logoPosition.height / 2 + "px");
     secretLogo.classList.add("pulse");
-    lg.overlay.classList.remove("closing", "show");
-    lg.overlay.classList.add("active", "opening");
-    lg.overlay.setAttribute("aria-hidden", "false");
+    loginElements.overlay.classList.remove("closing", "show");
+    loginElements.overlay.classList.add("active", "opening");
+    loginElements.overlay.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     setTimeout(() => {
       secretLogo.classList.remove("pulse");
-      lg.overlay.classList.remove("opening");
-      lg.overlay.classList.add("show");
-      lgBusy = false;
-      setTimeout(() => lg.email.focus(), reduceMotion ? 0 : 450);
-    }, reduceMotion ? 0 : 1100);
+      loginElements.overlay.classList.remove("opening");
+      loginElements.overlay.classList.add("show");
+      loginIsBusy = false;
+      setTimeout(() => loginElements.email.focus(), shouldReduceMotion ? 0 : 450);
+    }, shouldReduceMotion ? 0 : 1100);
   }
 
+  // Closes the login panel, restores scrolling, and clears its forms.
   function closeLogin() {
-    if (lgBusy || !lg.overlay.classList.contains("show")) return;
-    lg.overlay.classList.add("closing");
+    if (loginIsBusy || !loginElements.overlay.classList.contains("show")) return;
+    loginElements.overlay.classList.add("closing");
     setTimeout(() => {
-      lg.overlay.classList.remove("active", "show", "closing", "opening");
-      lg.overlay.setAttribute("aria-hidden", "true");
+      loginElements.overlay.classList.remove("active", "show", "closing", "opening");
+      loginElements.overlay.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
       resetLoginForm();
-    }, reduceMotion ? 0 : 350);
+    }, shouldReduceMotion ? 0 : 350);
   }
 
   document.querySelector("#lgClose").addEventListener("click", closeLogin);
   document.querySelector("#lgForgotPassword").addEventListener("click", showPasswordReset);
   document.querySelector("#lgBackToSignIn").addEventListener("click", showSignIn);
+  // Shows or hides the password field when its button is clicked.
   passwordToggles.forEach((toggle) => {
     toggle.addEventListener("click", () => {
       const input = document.getElementById(toggle.getAttribute("aria-controls"));
@@ -347,101 +353,115 @@ document.addEventListener("DOMContentLoaded", () => {
       toggle.setAttribute("aria-pressed", String(!isVisible));
     });
   });
-  lg.overlay.addEventListener("click", (e) => {
-    if (e.target === lg.overlay || e.target === lgBackdrop) closeLogin();
+  loginElements.overlay.addEventListener("click", (e) => {
+    if (e.target === loginElements.overlay || e.target === loginBackdrop) closeLogin();
   });
+  // Lets the user close the login panel with the Escape key.
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeLogin();
   });
 
   // The server emails a one-time code. The code is never shown here and never sent back to this page.
   const sendBtn = document.querySelector("#lgSendOtp");
+  // Requests a sign-in code and displays the result in the login panel.
   sendBtn.addEventListener("click", async () => {
-    const email = lg.email.value.trim();
+    const email = loginElements.email.value.trim();
     if (!email) {
-      lg.status.textContent = "Enter your administrator email first.";
-      lg.status.className = "lg-otp-status bad";
+      loginElements.status.textContent = "Enter your administrator email first.";
+      loginElements.status.className = "lg-otp-status bad";
       return;
     }
     sendBtn.disabled = true;
-    lg.status.textContent = "Sending the code…";
-    lg.status.className = "lg-otp-status";
+    loginElements.status.textContent = "Sending the code…";
+    loginElements.status.className = "lg-otp-status";
     try {
       const r = await Store.sendOtp(email);
-      lg.status.textContent = r.message;
-      lg.status.className = "lg-otp-status good";
+      loginElements.status.textContent = r.message;
+      loginElements.status.className = "lg-otp-status good";
     } catch (err) {
-      lg.status.textContent = err.message;
-      lg.status.className = "lg-otp-status bad";
+      loginElements.status.textContent = err.message;
+      loginElements.status.className = "lg-otp-status bad";
     } finally {
       sendBtn.disabled = false;
     }
   });
 
+  // Requests a password-reset code and displays the result in the reset panel.
   document.querySelector("#lgSendResetOtp").addEventListener("click", async (e) => {
     const button = e.currentTarget;
-    const email = lg.resetEmail.value.trim();
+    const email = loginElements.resetEmail.value.trim();
     if (!email) {
-      lg.resetStatus.textContent = "Enter your administrator email first.";
-      lg.resetStatus.className = "lg-otp-status bad";
+      loginElements.resetStatus.textContent = "Enter your administrator email first.";
+      loginElements.resetStatus.className = "lg-otp-status bad";
       return;
     }
     button.disabled = true;
-    lg.resetStatus.textContent = "Sending the code…";
-    lg.resetStatus.className = "lg-otp-status";
+    loginElements.resetStatus.textContent = "Sending the code…";
+    loginElements.resetStatus.className = "lg-otp-status";
     try {
       const r = await Store.sendResetOtp(email);
-      lg.resetStatus.textContent = r.message;
-      lg.resetStatus.className = "lg-otp-status good";
+      loginElements.resetStatus.textContent = r.message;
+      loginElements.resetStatus.className = "lg-otp-status good";
     } catch (err) {
-      lg.resetStatus.textContent = err.message;
-      lg.resetStatus.className = "lg-otp-status bad";
+      loginElements.resetStatus.textContent = err.message;
+      loginElements.resetStatus.className = "lg-otp-status bad";
     } finally {
       button.disabled = false;
     }
   });
 
-  lg.resetForm.addEventListener("submit", async (e) => {
+  // Checks the new passwords, then asks the server to update the account password.
+  loginElements.resetForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    lg.resetError.textContent = "";
-    if (lg.newPassword.value !== lg.confirmPassword.value) {
-      lg.resetError.textContent = "The passwords do not match.";
+    loginElements.resetError.textContent = "";
+    if (loginElements.newPassword.value !== loginElements.confirmPassword.value) {
+      loginElements.resetError.textContent = "The passwords do not match.";
       return;
     }
-    const submit = lg.resetForm.querySelector('[type="submit"]');
+    const submit = loginElements.resetForm.querySelector('[type="submit"]');
     submit.disabled = true;
     try {
-      const r = await Store.resetPassword(lg.resetEmail.value.trim(), lg.resetOtp.value.trim(), lg.newPassword.value);
+      const r = await Store.resetPassword(
+        loginElements.resetEmail.value.trim(),
+        loginElements.resetOtp.value.trim(),
+        loginElements.newPassword.value,
+      );
       showSignIn();
-      lg.password.value = "";
-      lg.otp.value = "";
-      lg.status.textContent = r.message;
-      lg.status.className = "lg-otp-status good";
+      loginElements.password.value = "";
+      loginElements.otp.value = "";
+      loginElements.status.textContent = r.message;
+      loginElements.status.className = "lg-otp-status good";
     } catch (err) {
-      lg.resetError.textContent = err.message;
+      loginElements.resetError.textContent = err.message;
     } finally {
       submit.disabled = false;
     }
   });
 
-  lg.form.addEventListener("submit", async (e) => {
+  // Sends the sign-in details and one-time code to the server for verification.
+  loginElements.form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (lgSubmitting) return;
-    lg.error.textContent = "";
-    lgSubmitting = true;
-    const submit = lg.form.querySelector('[type="submit"]');
+    if (loginIsSubmitting) return;
+    loginElements.error.textContent = "";
+    loginIsSubmitting = true;
+    const submit = loginElements.form.querySelector('[type="submit"]');
     if (submit) submit.disabled = true;
     try {
-      const account = await Store.login(lg.email.value, lg.password.value, lg.otp.value); // password + emailed code, checked by the server
+      const account = await Store.login(
+        loginElements.email.value,
+        loginElements.password.value,
+        loginElements.otp.value,
+      );
       sessionStorage.removeItem("scentSummaryShown"); // the owner sees the earnings summary once per login
       playWelcome(account);
     } catch (err) {
-      lg.error.textContent = err.message;
-      lgSubmitting = false;
+      loginElements.error.textContent = err.message;
+      loginIsSubmitting = false;
       if (submit) submit.disabled = false;
     }
   });
 
+  // Shows the user's name, then takes them to the dashboard.
   function playWelcome(account) {
     const w = document.querySelector("#welcome");
     document.querySelector("#welcomeName").textContent = account.username || account.name;
@@ -450,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.style.overflow = "hidden";
     setTimeout(() => {
       window.location.href = "dashboard.html";
-    }, reduceMotion ? 300 : 3000);
+    }, shouldReduceMotion ? 300 : 3000);
   }
 
   if (location.hash === "#login") {

@@ -854,14 +854,14 @@ Store.ready.then(function () {
     renderVoid(); // keep the void-order panel in sync with the revenue figures
     // KPI cards
     const k = kpiValues();
-    const bottle = '<svg viewBox="0 0 120 200"><use href="#bt-a"/></svg>';
+    const productImage = '<img class="kpi-product" src="assets/productlogo.png" alt="" aria-hidden="true">';
     $("#anKpis").innerHTML = [
       ["Today’s income", peso(k.today), "Sales recorded today", ""],
       ["This week", peso(k.week), "Monday to Sunday", ""],
       [`This year (${k.yearLabel})`, peso(k.year), "Annual income so far", ""],
       ["Total revenue", peso(k.total), `${k.count.toLocaleString("en-PH")} transactions overall`, "dark"],
     ]
-      .map(([l, v, s, c]) => `<div class="kpi ${c}"><small>${l}</small><strong>${v}</strong><span>${s}</span>${bottle}</div>`)
+      .map(([l, v, s, c]) => `<div class="kpi ${c}"><small>${l}</small><strong>${v}</strong><span>${s}</span>${productImage}</div>`)
       .join("");
 
     // controls
@@ -896,7 +896,7 @@ Store.ready.then(function () {
       ["Total product quantity sold", s.qty.toLocaleString("en-PH"), "Units deducted from stock"],
       ["Transactions", s.orders.toLocaleString("en-PH"), "Recorded in this period"],
     ]
-      .map(([l, v, sub], i) => `<div class="kpi ${i === 0 ? "dark" : ""}"><small>${l}</small><strong>${v}</strong><span>${esc(sub)}</span>${bottle}</div>`)
+      .map(([l, v, sub], i) => `<div class="kpi ${i === 0 ? "dark" : ""}"><small>${l}</small><strong>${v}</strong><span>${esc(sub)}</span>${productImage}</div>`)
       .join("");
 
     // top 5

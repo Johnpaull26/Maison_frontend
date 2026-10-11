@@ -773,7 +773,7 @@ textarea:focus {
 }
 .kpi strong {
   display: block;
-  font: 400 34px var(--serif);
+  font: 400 42px var(--serif);
   margin: 4px 0 2px;
   white-space: nowrap;
 }
@@ -781,14 +781,15 @@ textarea:focus {
   font-size: 14px;
   color: var(--taupe);
 }
-.kpi svg {
+.kpi-product {
   position: absolute;
-  right: -8px;
-  bottom: -10px;
-  width: 70px;
-  color: var(--gold);
-  opacity: 0.22;
-  transform: rotate(12deg);
+  right: 8px;
+  bottom: -12px;
+  width: 76px;
+  height: 112px;
+  object-fit: contain;
+  opacity: 0.82;
+  filter: drop-shadow(0 3px 5px rgba(45, 34, 24, 0.2));
 }
 .kpi.dark {
   background: linear-gradient(135deg, #211c18, #4a3626);
@@ -1389,6 +1390,13 @@ dialog[open] {
   .kpis,
   .stat-row {
     grid-template-columns: 1fr;
+  }
+  .kpi strong {
+    font-size: 38px;
+  }
+  .kpi-product {
+    width: 66px;
+    height: 98px;
   }
   .panel {
     padding: 18px 16px;
