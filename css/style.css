@@ -1444,3 +1444,101 @@ body.is-opening .hero-motion i, body.is-opening .hero-motion b { animation-play-
   .hero-motion i, .hero-motion b, .opening-orbit { animation: none; }
   .top-carousel-stage .top-card { transition: none; }
 }
+
+/* =========================================================
+   RESPONSIVE LAYER — laptop, tablet / iPad, phone
+   Added last so it refines the rules above. Desktop (>1100px)
+   is intentionally untouched.
+   Breakpoints: 1100 (small laptop/tablet landscape),
+                1000 (tablet portrait), 760 (large phone),
+                560 (phone), 380 (small phone)
+   ========================================================= */
+
+/* Anchor links must not hide under the sticky header; media never overflows. */
+html { scroll-padding-top: 96px; }
+img, svg, video { max-width: 100%; }
+.contacts strong, .contacts a, .modal-copy p { overflow-wrap: anywhere; } /* long address / links wrap instead of overflowing */
+.actions { flex-wrap: wrap; row-gap: 14px; }
+.tools { flex-wrap: wrap; }
+
+/* ---------- Small laptop / tablet landscape (<=1100px) ---------- */
+@media (max-width: 1100px) {
+  .hero h1 { font-size: clamp(44px, 7vw, 64px); }
+  .halo { width: min(510px, 80vw); height: min(510px, 80vw); }
+  .hero-art { min-height: 460px; }
+  /* Carousel: smaller orbit so side cards stay inside the screen */
+  .top-carousel-stage .top-card.pos-right { transform: translate3d(205px, -10px, -120px) scale(.82); }
+  .top-carousel-stage .top-card.pos-left { transform: translate3d(-205px, -10px, -120px) scale(.82); }
+  .top-carousel-stage .top-card.pos-far-right { transform: translate3d(320px, -34px, -320px) scale(.62); }
+  .top-carousel-stage .top-card.pos-far-left { transform: translate3d(-320px, -34px, -320px) scale(.62); }
+}
+
+/* ---------- Tablet portrait / iPad (<=1000px) ---------- */
+@media (max-width: 1000px) {
+  .about { grid-template-columns: 1fr; gap: 48px; }
+  .about-art { min-height: 440px; }
+  .about-product { max-width: min(100%, 420px); max-height: 440px; object-fit: contain; }
+  .contact-card { grid-template-columns: 1fr; gap: 34px; padding: 48px 6%; }
+  /* Product details: stack image above text and let the card scroll */
+  .modal { grid-template-columns: 1fr; max-height: calc(100dvh - 32px); overflow-y: auto; }
+  .modal-img { min-height: 300px; max-height: 360px; }
+}
+
+/* ---------- Large phones (<=760px) ---------- */
+@media (max-width: 760px) {
+  .section { padding: 64px 5%; }
+  .hero-copy, .heading.center { text-align: left; }
+  .hero-product { max-width: 100%; height: auto; }
+  .tools .search, .tools select { width: 100%; }
+  .actions .button { width: 100%; text-align: center; }
+  .top-carousel-stage { height: 460px; }
+  .top-carousel-stage .top-card.pos-right { transform: translate3d(140px, -8px, -120px) scale(.8); }
+  .top-carousel-stage .top-card.pos-left { transform: translate3d(-140px, -8px, -120px) scale(.8); }
+  .contact-card { padding: 38px 6%; }
+  footer { text-align: left; }
+  /* Login panel: never taller than the screen; scrolls inside if needed */
+  .lg-card { max-width: 94vw; max-height: calc(100dvh - 24px); overflow-y: auto; }
+}
+
+/* ---------- Phones (<=560px) ---------- */
+@media (max-width: 560px) {
+  .header { height: 70px; }
+  .brand { width: 120px; height: 52px; }
+  .hero h1 { font-size: clamp(34px, 10.5vw, 44px); }
+  .hero-art { min-height: 320px; }
+  .top-carousel-stage { height: 430px; }
+  .top-carousel-stage .top-card { width: 250px; margin-left: -125px; }
+  .top-carousel-stage .top-card.pos-right { transform: translate3d(112px, -6px, -120px) scale(.78); opacity: .6; }
+  .top-carousel-stage .top-card.pos-left { transform: translate3d(-112px, -6px, -120px) scale(.78); opacity: .6; }
+  .carousel-btn { width: 40px; height: 40px; font-size: 22px; left: auto; }
+  .carousel-prev { left: 2px; } .carousel-next { right: 2px; }
+  .modal-img { min-height: 240px; }
+  .modal-copy { padding: 28px 20px; }
+  .modal-copy h2 { font-size: 34px; }
+  .meta { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .orbit-1 { width: min(380px, 86vw); height: min(380px, 86vw); }
+  .orbit-2 { width: min(540px, 120vw); height: min(540px, 120vw); }
+  .site-opening { overflow: hidden; }
+}
+
+/* ---------- Small phones (<=380px) ---------- */
+@media (max-width: 380px) {
+  .header { padding: 0 4%; }
+  .brand { width: 100px; }
+  .header nav { gap: 8px; }
+  .header nav a { font-size: 12px; letter-spacing: .03em; }
+  .top-carousel-stage .top-card { width: 232px; margin-left: -116px; }
+  .top-carousel-stage .top-card.pos-right { transform: translate3d(100px, -6px, -120px) scale(.76); }
+  .top-carousel-stage .top-card.pos-left { transform: translate3d(-100px, -6px, -120px) scale(.76); }
+}
+
+/* ---------- Phones turned sideways (short screens) ---------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .hero { min-height: auto; }
+  .header { position: static; }
+  .lg-card, .modal { max-height: calc(100dvh - 16px); overflow-y: auto; }
+}
+
+/* Clip the carousel horizontally: off-screen side cards must not widen the page on phones (fixes sideways scrolling). */
+.best, .top-carousel { overflow-x: clip; }
+.top-carousel { padding-bottom: 6px; }
