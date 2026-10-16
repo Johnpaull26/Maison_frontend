@@ -175,6 +175,8 @@
     async createProduct(fields) { await api("POST", "/products", fields); await reload.products(); },
     async updateProduct(id, fields) { await api("PUT", `/products/${id}`, fields); await reload.products(); },
     async deleteProducts(ids) { await api("POST", "/products/delete", { ids }); await reload.products(); },
+    // restore=false archives (marks inactive, hidden from the landing page); restore=true makes them active again
+    async archiveProducts(ids, restore) { await api("POST", "/products/archive", { ids, active: !!restore }); await reload.products(); },
 
     /* ---- sales ---- */
     getTransactions: () => cache.transactions, // one row per product line, voided rows included
@@ -196,6 +198,8 @@
       await api("PUT", `/accounts/${id}`, fields);
       await Promise.all([reload.accounts(), Store.refreshSession()]);
     },
+    // owner only: the staff member's current password (null when it is not available)
+    async getAccountPassword(id) { return (await api("GET", `/accounts/${id}/password`)).password; },
     async deleteAccount(id) { await api("DELETE", `/accounts/${id}`); await reload.accounts(); },
 
     /* ---- Earning Notification (owner only) ---- */

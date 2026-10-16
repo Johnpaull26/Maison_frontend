@@ -125,13 +125,19 @@
 
           <div class="panel">
             <div class="toolbar">
+              <label class="view-switch">View
+                <select id="invView" aria-label="Inventory view">
+                  <option value="active">Active Products</option>
+                  <option value="archive">Archive</option>
+                </select>
+              </label>
               <label class="search">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
                 <input id="invSearch" type="search" placeholder="Search product name…" autocomplete="off" />
               </label>
               <span class="muted" id="invCount"></span>
               <div class="spacer"></div>
-              <button class="btn danger-outline" id="invDeleteSel" disabled>Delete Selected (0)</button>
+              <button class="btn danger-outline" id="invArchiveSel" disabled>Archive Selected (0)</button>
               <button class="btn gold" id="invAdd">+ Add Product</button>
             </div>
             <div class="table-wrap">
@@ -152,7 +158,7 @@
               </table>
               <div class="empty" id="invEmpty" hidden>No products match your search.</div>
             </div>
-            <p class="hint">Tip: click a row (or its checkbox) to select it, then use <strong>Delete Selected</strong> to remove several products at once.</p>
+            <p class="hint" id="invHint"></p>
           </div>
         </section>
 
@@ -211,6 +217,19 @@
             </svg>
           </header>
 
+          <div class="panel view-bar">
+            <label class="view-switch">Show
+              <select id="anView" aria-label="Sales Analytics view">
+                <option value="reports">Sales Reports</option>
+                <option value="history">Transaction History</option>
+                <option value="voided">Voided Transactions</option>
+              </select>
+            </label>
+            <span class="muted" id="anViewNote"></span>
+          </div>
+
+          <!-- VIEW 1: Sales Reports (the whole business's sales figures) -->
+          <div id="anViewReports">
           <div class="an-top">
             <div class="kpis" id="anKpis"></div>
           </div>
@@ -249,36 +268,51 @@
 
           <div class="stat-row" id="anStats"></div>
 
-          <div class="two-col">
             <div class="panel">
               <h2>Top 5 most selling products</h2>
               <p class="muted" id="anTopNote"></p>
               <div id="anTop"></div>
             </div>
+          </div>
+
+          <!-- VIEW 2: Transaction History (every order, 10 per page) -->
+          <div id="anViewHistory" hidden>
             <div class="panel">
-              <h2>Latest transactions</h2>
-              <p class="muted" id="anTxNote"></p>
-              <div class="table-wrap short">
-                <table class="tbl compact" id="anTxTable">
-                  <thead>
-                    <tr><th>ID</th><th>Date &amp; time</th><th>Product</th><th class="num">Qty</th><th class="num">Total</th></tr>
-                  </thead>
-                  <tbody id="anTx"></tbody>
-                </table>
+              <div class="an-head">
+                <div><h2>Transaction history</h2><p class="muted" id="thNote"></p></div>
+                <label class="search void-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+                  <input id="thSearch" type="search" placeholder="Search orders…" autocomplete="off" /></label>
               </div>
+              <div class="table-wrap tx-wrap">
+                <table class="tbl compact tx-table">
+                  <thead>
+                    <tr><th>Order ID</th><th>Date &amp; time</th><th>Customer</th><th>Items</th><th class="num">Total</th><th>Status</th><th class="actions-h">Actions</th></tr>
+                  </thead>
+                  <tbody id="thBody"></tbody>
+                </table>
+                <div class="empty" id="thEmpty" hidden>No matching transactions.</div>
+              </div>
+              <div class="pager" id="thPager"></div>
             </div>
           </div>
 
-          <!-- VOID ORDER: cancel / return an order; restocks inventory and removes it from revenue -->
-          <div class="panel" id="voidPanel">
-            <div class="an-head">
-              <div><h2>Void order</h2><p class="muted" id="voidNote"></p></div>
-              <label class="search void-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
-                <input id="voidSearch" type="search" placeholder="Search order ID, customer or product…" autocomplete="off" /></label>
+          <!-- VIEW 3: Voided Transactions (the voided orders from the history) -->
+          <div id="anViewVoided" hidden>
+            <div class="panel">
+              <div class="an-head">
+                <div><h2>Voided transactions</h2><p class="muted" id="vdNote"></p></div>
+              </div>
+              <div class="table-wrap tx-wrap">
+                <table class="tbl compact tx-table">
+                  <thead>
+                    <tr><th>Order ID</th><th>Date &amp; time</th><th>Customer</th><th>Items</th><th class="num">Total</th><th>Reason</th><th>Voided on</th><th>Voided by</th></tr>
+                  </thead>
+                  <tbody id="vdBody"></tbody>
+                </table>
+                <div class="empty" id="vdEmpty" hidden>No voided transactions yet.</div>
+              </div>
+              <div class="pager" id="vdPager"></div>
             </div>
-            <div class="void-list" id="voidList"></div>
-            <h3 class="void-sub">Voided orders</h3>
-            <div class="void-list voided" id="voidHistory"></div>
           </div>
         </section>
 
@@ -367,7 +401,19 @@
             <label class="full">Full name *<input id="acName" maxlength="40" placeholder="e.g. Isabelle Navarro" /></label>
             <label>Username *<input id="acUser" maxlength="20" placeholder="isabelle.n" autocomplete="off" /></label>
             <label>Email address *<input id="acEmail" type="email" maxlength="60" placeholder="name@maisonreve.com" autocomplete="off" /></label>
-            <label class="full"><span id="acPassLabel">Password *</span><input id="acPass" type="password" maxlength="40" placeholder="At least 6 characters" autocomplete="new-password" /></label>
+            <label class="full"><span id="acPassLabel">Password *</span>
+              <span class="pw-field">
+                <input id="acPass" type="password" maxlength="40" placeholder="At least 6 characters" autocomplete="new-password" />
+                <button type="button" class="pw-toggle" data-for="acPass" aria-controls="acPass" aria-label="Show password" aria-pressed="false">Show</button>
+              </span>
+            </label>
+            <label class="full">Confirm password *
+              <span class="pw-field">
+                <input id="acPass2" type="password" maxlength="40" placeholder="Re-type the password" autocomplete="new-password" />
+                <button type="button" class="pw-toggle" data-for="acPass2" aria-controls="acPass2" aria-label="Show password" aria-pressed="false">Show</button>
+              </span>
+            </label>
+            <small class="muted full" id="acPassHint"></small>
           </div>
         </div>
         <p class="error" id="acError"></p>

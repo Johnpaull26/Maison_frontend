@@ -992,7 +992,7 @@ footer div small {
 /* the floating card */
 .lg-card {
   position: relative;
-  width: min(410px, 100%);
+  width: min(520px, 100%); /* wide enough for the logo, still well inside the screen */
   max-height: calc(100vh - 40px);
   overflow-y: auto;
   background: #fff;
@@ -1028,9 +1028,14 @@ footer div small {
   color: var(--espresso);
 }
 .lg-brand {
-  font: 26px var(--serif);
-  color: var(--gold);
-  margin-bottom: 18px;
+  margin: -14px 0 6px;
+  text-align: center;
+}
+.lg-brand img {
+  display: block;
+  width: min(380px, 100%);
+  height: auto;
+  margin: 0 auto;
 }
 .lg-eyebrow {
   margin: 0;

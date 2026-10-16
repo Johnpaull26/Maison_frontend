@@ -9,6 +9,9 @@
   --espresso: #211c18;
   --gold: #b89b72;
   --gold2: #927751;
+  --btn: #e2d0b0; /* buttons: a warm sand, clearly different from the ivory page and white panels */
+  --btn-hover: #d3bd94;
+  --btn-line: #a8925f;
   --taupe: #756b61;
   --line: rgba(33, 28, 24, 0.13);
   --green: #25663a;
@@ -329,8 +332,8 @@ h3 {
   z-index: 25;
   width: 46px;
   height: 46px;
-  border: 1px solid var(--line);
-  background: #fff;
+  border: 1px solid var(--btn-line);
+  background: var(--btn);
   font-size: 22px;
   box-shadow: var(--shadow);
 }
@@ -455,14 +458,14 @@ textarea:focus {
   height: 46px;
   padding: 0 22px;
   border: 1px solid var(--espresso);
-  background: #fff;
+  background: var(--btn);
   font-weight: 700;
   letter-spacing: 0.03em;
   transition: 0.2s;
   white-space: nowrap;
 }
 .btn:hover:not(:disabled) {
-  background: var(--cream);
+  background: var(--btn-hover);
 }
 .btn.gold {
   background: linear-gradient(135deg, #cfae7e, #a98655);
@@ -490,9 +493,10 @@ textarea:focus {
 .btn.danger-outline {
   border-color: #b9533f;
   color: #9b3426;
+  background: #f6d9d2;
 }
 .btn.danger-outline:hover:not(:disabled) {
-  background: var(--red-bg);
+  background: #efc2b8;
 }
 .btn.small {
   height: 38px;
@@ -601,13 +605,13 @@ textarea:focus {
   height: 34px;
   padding: 0 13px;
   margin-left: 6px;
-  background: #fff;
-  border: 1px solid #cdbfa9;
+  background: var(--btn);
+  border: 1px solid var(--btn-line);
   font-size: 14px;
   font-weight: 600;
 }
 .icon-btn:hover {
-  background: var(--cream);
+  background: var(--btn-hover);
 }
 .icon-btn.del {
   color: #9b3426;
@@ -826,12 +830,15 @@ textarea:focus {
   height: 42px;
   padding: 0 22px;
   border: 0;
-  background: #fff;
+  background: var(--btn);
   font-weight: 700;
   border-right: 1px solid var(--line);
 }
 .seg button:last-child {
   border-right: 0;
+}
+.seg button:hover:not(.active) {
+  background: var(--btn-hover);
 }
 .seg button.active {
   background: var(--espresso);
@@ -1145,12 +1152,12 @@ dialog[open] {
 }
 .stepper button {
   height: 52px;
-  border: 1px solid #d4cbc0;
-  background: var(--cream);
+  border: 1px solid var(--btn-line);
+  background: var(--btn);
   font-size: 24px;
 }
 .stepper button:hover {
-  background: #e4d8c5;
+  background: var(--btn-hover);
 }
 .stepper input {
   height: 52px;
@@ -1516,7 +1523,8 @@ input[type="file"] {
 .cart-item img { width: 56px; height: 56px; object-fit: cover; }
 .cart-item-info small { display: block; color: #756b61; }
 .cart-stepper { display: flex; align-items: center; gap: 8px; }
-.cart-stepper button, .cart-remove { width: 28px; height: 28px; border: 1px solid #d4cbc0; background: #fff; cursor: pointer; }
+.cart-stepper button, .cart-remove { width: 28px; height: 28px; border: 1px solid var(--btn-line); background: var(--btn); cursor: pointer; }
+.cart-stepper button:hover, .cart-remove:hover { background: var(--btn-hover); }
 .cart-remove { border: 0; font-size: 20px; color: #9b4e3c; }
 .cart-empty { text-align: center; padding: 30px 10px; color: #756b61; }
 .cart-empty span { display: block; font-size: 30px; color: #b89b72; }
@@ -1570,13 +1578,13 @@ input[type="file"] {
   place-items: center;
   border: 1px solid var(--gold);
   border-radius: 50%;
-  background: #fff;
+  background: var(--btn);
   color: var(--espresso);
   box-shadow: var(--shadow);
   transition: transform 0.2s ease, background 0.2s ease;
 }
 .bell-btn[hidden] { display: none; }
-.bell-btn:hover { background: var(--cream); transform: translateY(-1px); }
+.bell-btn:hover { background: var(--btn-hover); transform: translateY(-1px); }
 .bell-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .bell-btn.ring svg { animation: bellRing 0.8s ease 1; transform-origin: 50% 12%; }
 @keyframes bellRing {
@@ -1682,4 +1690,153 @@ dialog { max-width: calc(100vw - 20px); max-height: calc(100dvh - 20px); }
   .sc-grid { grid-template-columns: 1fr; }
   .dlg.cart, .receipt-dlg { width: 96vw; }
   .sm-grid { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   VIEW DROPDOWNS (Inventory / Sales Analytics), PAGER, PASSWORD BOXES
+   ========================================================= */
+.view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+.view-switch select {
+  height: 46px;
+  min-width: 210px;
+  padding: 0 38px 0 14px;
+  border: 1px solid var(--espresso);
+  background-color: var(--btn);
+  font-weight: 700;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23211c18' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+.view-switch select:hover {
+  background-color: var(--btn-hover);
+}
+.view-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 16px 26px;
+}
+.pill.inactive {
+  background: #e6e0d8;
+  color: #5c534a;
+}
+
+/* transaction tables */
+.tx-table td.tx-items {
+  max-width: 340px;
+  font-size: 15px;
+  color: var(--taupe);
+}
+.tx-table td.actions {
+  white-space: nowrap;
+}
+.void-search {
+  flex: 0 1 380px;
+}
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+}
+.pager .pg {
+  min-width: 42px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--btn-line);
+  background: var(--btn);
+  font-weight: 700;
+}
+.pager .pg:hover:not(:disabled):not(.active) {
+  background: var(--btn-hover);
+}
+.pager .pg.active {
+  background: var(--espresso);
+  border-color: var(--espresso);
+  color: #fff;
+}
+.pager .pg:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pager .pg-gap {
+  padding: 0 4px;
+  color: var(--taupe);
+}
+
+/* password box with a Show / Hide button */
+.pw-field {
+  position: relative;
+  display: block;
+}
+.pw-field input {
+  width: 100%;
+  padding-right: 78px;
+}
+.pw-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  height: 34px;
+  min-width: 62px;
+  padding: 0 12px;
+  border: 1px solid var(--btn-line);
+  background: var(--btn);
+  font-size: 14px;
+  font-weight: 700;
+}
+.pw-toggle:hover {
+  background: var(--btn-hover);
+}
+@media (max-width: 560px) {
+  .view-switch { flex-wrap: wrap; }
+  .view-switch select { min-width: 0; width: 100%; }
+}
+
+/* Inventory toolbar: keep the view dropdown, search and buttons on one line where there is room */
+#tab-inventory .toolbar .search {
+  flex: 0 1 200px;
+  min-width: 160px;
+}
+#tab-inventory .view-switch select {
+  min-width: 190px;
+}
+#invCount {
+  font-size: 14px;
+}
+/* transaction tables: compact so they fit the panel; order IDs never wrap, the table scrolls sideways on small screens */
+.tx-table {
+  font-size: 15px;
+}
+.tx-table th,
+.tx-table td {
+  padding: 12px 8px;
+}
+.tx-table td:first-child strong {
+  white-space: nowrap;
+  font-size: 14.5px;
+}
+#thBody td:nth-child(2) {
+  white-space: nowrap;
+}
+.tx-table .pill {
+  padding: 3px 10px 3px 9px;
+  font-size: 13px;
+}
+.tx-table .icon-btn {
+  padding: 0 10px;
+  margin-left: 4px;
 }
