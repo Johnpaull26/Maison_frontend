@@ -174,7 +174,7 @@ function close() {
 document.addEventListener("DOMContentLoaded", () => {
   playOpening(); // starts at once; it does not wait for the server
   Store.ready.then(() => {
-    products = Store.getProducts();
+    products = Store.getProducts().filter((p) => p.active !== false); // archived (inactive) products are not shown here
     afterFirstPaint(() => {
       renderTopFive();
       render();

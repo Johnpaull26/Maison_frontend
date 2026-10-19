@@ -150,10 +150,16 @@ Store.ready.then(function () {
      ========================================================= */
   const invSelected = new Set();
   let invQuery = "";
+  let invView = "active"; // "active" = Active Products, "archive" = Archive (inactive products)
+  const isActive = (p) => p.active !== false; // products created before archiving existed count as active
 
   function invList() {
     const q = invQuery.trim().toLowerCase();
-    return products.filter((p) => !q || p.name.toLowerCase().includes(q) || p.family.toLowerCase().includes(q));
+    return products.filter(
+      (p) =>
+        (invView === "archive" ? !isActive(p) : isActive(p)) &&
+        (!q || p.name.toLowerCase().includes(q) || p.family.toLowerCase().includes(q)),
+    );
   }
 
   function renderInventory() {
@@ -162,10 +168,15 @@ Store.ready.then(function () {
     [...invSelected].forEach((id) => {
       if (!products.some((p) => p.id === id)) invSelected.delete(id);
     });
+    const archive = invView === "archive";
     $("#invBody").innerHTML = list
       .map((p) => {
         const a = Store.availability(p.stock);
         const sel = invSelected.has(p.id);
+        const status = archive ? '<span class="pill inactive">Inactive</span>' : `<span class="pill ${a.key}">${a.label}</span>`;
+        const actions = archive
+          ? '<button class="icon-btn edit" data-act="restore">Restore</button>'
+          : '<button class="icon-btn edit" data-act="edit">Edit</button><button class="icon-btn del" data-act="archive">Archive</button>';
         return `<tr data-id="${p.id}" class="${sel ? "selected" : ""}">
           <td class="c-check"><input type="checkbox" class="row-check" ${sel ? "checked" : ""} aria-label="Select ${esc(p.name)}"></td>
           <td><img class="thumb" src="${imgOf(p)}" alt="${esc(p.name)}"></td>
@@ -173,21 +184,32 @@ Store.ready.then(function () {
           <td>${esc(p.category)}</td>
           <td class="num">${p.stock}</td>
           <td class="num">${peso(p.price)}</td>
-          <td><span class="pill ${a.key}">${a.label}</span></td>
-          <td class="actions"><button class="icon-btn edit" data-act="edit">Edit</button><button class="icon-btn del" data-act="delete">Delete</button></td>
+          <td>${status}</td>
+          <td class="actions">${actions}</td>
         </tr>`;
       })
       .join("");
     $("#invEmpty").hidden = list.length > 0;
-    $("#invCount").textContent = `${list.length} of ${products.length} products`;
+    $("#invEmpty").textContent = invQuery.trim()
+      ? "No products match your search."
+      : archive ? "The Archive is empty. Products you archive will appear here." : "There are no active products.";
+    const total = products.filter((p) => isActive(p) !== archive).length;
+    const count = `Showing ${list.length} of ${total} ${archive ? "archived" : "active"} products.`;
+    $("#invCount").textContent = "";
+    $("#invAdd").hidden = archive; // new products are added to the active list
+    $("#invHint").textContent = count + " " + (archive
+      ? "Archived products are inactive: they are hidden from the landing page and cannot be sold. Restore one to make it active again."
+      : "Archive a product to move it to the Archive. It becomes inactive and disappears from the landing page’s fragrance list (nothing is deleted).");
     updateSelectionUI();
   }
 
   function updateSelectionUI() {
     const n = invSelected.size;
-    const btn = $("#invDeleteSel");
+    const btn = $("#invArchiveSel");
+    const archive = invView === "archive";
     btn.disabled = n === 0;
-    btn.textContent = `Delete Selected (${n})`;
+    btn.textContent = `${archive ? "Restore" : "Archive"} Selected (${n})`;
+    btn.classList.toggle("danger-outline", !archive);
     const visible = invList();
     const all = $("#invAll");
     all.checked = visible.length > 0 && visible.every((p) => invSelected.has(p.id));
@@ -199,6 +221,12 @@ Store.ready.then(function () {
     renderInventory();
   });
 
+  $("#invView").addEventListener("change", (e) => {
+    invView = e.target.value;
+    invSelected.clear();
+    renderInventory();
+  });
+
   $("#invBody").addEventListener("click", (e) => {
     const tr = e.target.closest("tr");
     if (!tr) return;
@@ -206,7 +234,8 @@ Store.ready.then(function () {
     const act = e.target.closest("[data-act]");
     if (act) {
       if (act.dataset.act === "edit") openProductDialog(id);
-      else deleteProducts([id]);
+      else if (act.dataset.act === "restore") archiveProducts([id], true);
+      else archiveProducts([id], false);
       return;
     }
     if (invSelected.has(id)) invSelected.delete(id);
@@ -221,30 +250,35 @@ Store.ready.then(function () {
     renderInventory();
   });
 
-  $("#invDeleteSel").addEventListener("click", () => deleteProducts([...invSelected]));
+  $("#invArchiveSel").addEventListener("click", () => archiveProducts([...invSelected], invView === "archive"));
 
-  async function deleteProducts(ids) {
+  // Archive = mark inactive (hidden from the landing page, cannot be sold). Restore = active again. Nothing is deleted.
+  async function archiveProducts(ids, restore) {
     const items = products.filter((p) => ids.includes(p.id));
     if (!items.length) return;
+    const many = items.length > 1;
     const ok = await confirmAction({
-      title: items.length === 1 ? "Delete product" : `Delete ${items.length} products`,
-      message:
-        items.length === 1
-          ? `You are about to delete “${items[0].name}” from the inventory. This cannot be undone.`
-          : `You are about to delete ${items.length} selected products from the inventory. This cannot be undone.`,
-      confirmText: "Confirm Delete",
-      tone: "danger",
+      title: restore ? (many ? `Restore ${items.length} products` : "Restore product") : many ? `Archive ${items.length} products` : "Archive product",
+      message: restore
+        ? many
+          ? `${items.length} selected products will become active again and show on the landing page.`
+          : `“${items[0].name}” will become active again and show on the landing page.`
+        : many
+          ? `${items.length} selected products will be moved to the Archive and marked inactive. They will no longer show in the landing page’s fragrance list. You can restore them anytime.`
+          : `“${items[0].name}” will be moved to the Archive and marked inactive. It will no longer show in the landing page’s fragrance list. You can restore it anytime.`,
+      confirmText: restore ? "Confirm Restore" : "Confirm Archive",
+      tone: restore ? "dark" : "danger",
     });
     if (!ok) return;
     try {
-      await Store.deleteProducts(ids);
+      await Store.archiveProducts(ids, restore);
     } catch (e) {
       return toast(e.message, "error");
     }
     products = Store.getProducts();
     ids.forEach((id) => invSelected.delete(id));
     renderInventory();
-    toast(items.length === 1 ? `“${items[0].name}” deleted.` : `${items.length} products deleted.`);
+    toast(many ? `${items.length} products ${restore ? "restored" : "archived"}.` : `“${items[0].name}” ${restore ? "restored" : "archived"}.`);
   }
 
   /* ----- add / edit product dialog ----- */
@@ -381,7 +415,7 @@ Store.ready.then(function () {
     return [...salesCart.values()]
       .map((item) => {
         const p = products.find((x) => x.id === item.id);
-        return p ? { ...item, product: p } : null;
+        return p && isActive(p) ? { ...item, product: p } : null;
       })
       .filter(Boolean);
   }
@@ -409,6 +443,7 @@ Store.ready.then(function () {
     const q = scQuery.trim().toLowerCase();
     const list = products.filter(
       (p) =>
+        isActive(p) && // archived (inactive) products cannot be sold
         (scCat === "all" || p.category === scCat) &&
         (!q || `${p.name} ${p.family} ${p.category}`.toLowerCase().includes(q)),
     );
@@ -851,7 +886,7 @@ Store.ready.then(function () {
   }
 
   function renderAnalytics() {
-    renderVoid(); // keep the void-order panel in sync with the revenue figures
+    renderAnView(); // keep the dropdown views (history / voided) in sync with the revenue figures
     // KPI cards
     const k = kpiValues();
     const productImage = '<img class="kpi-product" src="assets/productlogo.png" alt="" aria-hidden="true">';
@@ -911,12 +946,6 @@ Store.ready.then(function () {
           )
           .join("")
       : '<div class="empty">No sales in this period.</div>';
-
-    // transactions
-    $("#anTxNote").textContent = s.orders ? `Showing the latest ${Math.min(s.orders, 60)} of ${s.orders.toLocaleString("en-PH")} in this period` : "No transactions in this period.";
-    $("#anTx").innerHTML = s.latest
-      .map((t) => `<tr><td>${txId(t)}</td><td>${fmtDateTime(t.ts)}</td><td>${esc(t.name)}</td><td class="num">${t.qty}</td><td class="num">${peso(t.total)}</td></tr>`)
-      .join("");
   }
 
   $("#anModes").addEventListener("click", (e) => {
@@ -1224,7 +1253,6 @@ Store.ready.then(function () {
        3. lowers each product's "sold" count,
        4. drops the order from `transactions`, which feeds ALL revenue figures.
      ========================================================= */
-  let voidQuery = ""; // text typed in the void search box
   let voidTarget = null; // the order currently shown in the void dialog
 
   // Group transaction rows (one per product) into whole orders.
@@ -1242,27 +1270,112 @@ Store.ready.then(function () {
 
   const orderLine = (o) => o.items.map((i) => `${esc(i.name)} × ${i.qty}`).join(", ");
 
-  // Draw the list of voidable orders and the history of voided ones.
-  function renderVoid() {
-    const all = groupOrders(Store.getTransactions());
-    const q = voidQuery.trim().toLowerCase();
-    const match = (o) => !q || `${o.orderId} ${o.customer} ${o.items.map((i) => i.name).join(" ")}`.toLowerCase().includes(q);
-    const active = all.filter((o) => !o.voided && match(o)).slice(0, 15);
-    const voided = all.filter((o) => o.voided);
-    $("#voidNote").textContent = `${voided.length} voided order${voided.length === 1 ? "" : "s"} • ${peso(voided.reduce((s, o) => s + o.total, 0))} removed from revenue`;
-    $("#voidList").innerHTML = active.length
-      ? active.map((o) => `<div class="void-row" data-order="${esc(o.orderId)}"><div><strong>${esc(o.orderId)}</strong><small>${esc(fmtDateTime(o.ts))} • ${esc(o.customer)}</small><span>${orderLine(o)}</span></div><b>${peso(o.total)}</b><div class="void-actions"><button class="btn small" data-receipt>Receipt</button><button class="btn small danger-outline" data-void>Void</button></div></div>`).join("")
-      : '<div class="empty">No matching orders.</div>';
-    $("#voidHistory").innerHTML = voided.length
-      ? voided.slice(0, 10).map((o) => `<div class="void-row"><div><strong>${esc(o.orderId)}</strong><small>${esc(o.reason || "Voided")} • ${o.voidedAt ? esc(fmtDateTime(o.voidedAt)) : ""}${o.voidedBy ? " • " + esc(o.voidedBy) : ""}</small><span>${orderLine(o)}</span></div><b class="struck">${peso(o.total)}</b></div>`).join("")
-      : '<div class="empty">No voided orders yet.</div>';
+  /* ----- Sales Analytics dropdown: Sales Reports • Transaction History • Voided Transactions ----- */
+  const TX_PER_PAGE = 10; // records per page in the tables
+  let anView = "reports";
+  let thQuery = "";
+  const pageOf = { history: 1, voided: 1 };
+
+  const anViewNotes = {
+    reports: "The whole business’s sales figures.",
+    history: "Every transaction recorded on the website.",
+    voided: "Voided orders taken from the transaction history.",
+  };
+
+  function showAnView() {
+    $("#anViewReports").hidden = anView !== "reports";
+    $("#anViewHistory").hidden = anView !== "history";
+    $("#anViewVoided").hidden = anView !== "voided";
+    $("#anViewNote").textContent = anViewNotes[anView];
+  }
+  $("#anView").addEventListener("change", (e) => {
+    anView = e.target.value;
+    showAnView();
+    renderAnView();
+    if (anView === "reports") renderAnalytics();
+  });
+
+  // Page buttons: ‹ Prev 1 2 3 … 9 Next ›
+  function pagerHtml(page, pages) {
+    if (pages <= 1) return "";
+    const nums = [];
+    for (let n = 1; n <= pages; n++) if (n === 1 || n === pages || Math.abs(n - page) <= 1) nums.push(n);
+    const btn = (label, n, cls = "", off = false) => `<button type="button" class="pg ${cls}" data-page="${n}" ${off ? "disabled" : ""}>${label}</button>`;
+    let out = btn("‹ Prev", page - 1, "nav", page === 1);
+    nums.forEach((n, k) => {
+      if (k && n - nums[k - 1] > 1) out += '<span class="pg-gap">…</span>';
+      out += btn(n, n, n === page ? "active" : "");
+    });
+    return out + btn("Next ›", page + 1, "nav", page === pages);
   }
 
-  $("#voidSearch").addEventListener("input", (e) => { voidQuery = e.target.value; renderVoid(); });
+  function renderPage(rows, key, el) {
+    const pages = Math.max(1, Math.ceil(rows.length / TX_PER_PAGE));
+    pageOf[key] = Math.min(Math.max(1, pageOf[key]), pages);
+    const start = (pageOf[key] - 1) * TX_PER_PAGE;
+    el.innerHTML = pagerHtml(pageOf[key], pages);
+    return { slice: rows.slice(start, start + TX_PER_PAGE), start, pages };
+  }
 
-  // Row buttons: Receipt (re-open receipt) and Void (open the reason dialog).
-  $("#voidList").addEventListener("click", (e) => {
-    const row = e.target.closest(".void-row");
+  function renderAnView() {
+    const all = groupOrders(Store.getTransactions());
+
+    // ---- Transaction History: every order, newest first, 10 per page ----
+    const q = thQuery.trim().toLowerCase();
+    const found = all.filter((o) => !q || `${o.orderId} ${o.customer} ${o.items.map((i) => i.name).join(" ")}`.toLowerCase().includes(q));
+    const h = renderPage(found, "history", $("#thPager"));
+    $("#thBody").innerHTML = h.slice
+      .map((o) => `<tr data-order="${esc(o.orderId)}">
+        <td><strong>${esc(o.orderId)}</strong></td>
+        <td>${esc(fmtDateTime(o.ts))}</td>
+        <td>${esc(o.customer)}</td>
+        <td class="tx-items">${orderLine(o)}</td>
+        <td class="num ${o.voided ? "struck" : ""}">${peso(o.total)}</td>
+        <td>${o.voided ? '<span class="pill out">Voided</span>' : '<span class="pill high">Completed</span>'}</td>
+        <td class="actions"><button class="icon-btn edit" data-receipt>Receipt</button>${o.voided ? "" : '<button class="icon-btn del" data-void>Void</button>'}</td>
+      </tr>`)
+      .join("");
+    $("#thEmpty").hidden = found.length > 0;
+    $("#thNote").textContent = found.length
+      ? `Showing ${h.start + 1}–${h.start + h.slice.length} of ${found.length} transaction${found.length === 1 ? "" : "s"} • ${TX_PER_PAGE} per page`
+      : `${all.length} transaction${all.length === 1 ? "" : "s"}`;
+
+    // ---- Voided Transactions: the voided orders from the history, 10 per page ----
+    const voided = all.filter((o) => o.voided);
+    const v = renderPage(voided, "voided", $("#vdPager"));
+    $("#vdBody").innerHTML = v.slice
+      .map((o) => `<tr>
+        <td><strong>${esc(o.orderId)}</strong></td>
+        <td>${esc(fmtDateTime(o.ts))}</td>
+        <td>${esc(o.customer)}</td>
+        <td class="tx-items">${orderLine(o)}</td>
+        <td class="num struck">${peso(o.total)}</td>
+        <td>${esc(o.reason || "Voided")}</td>
+        <td>${o.voidedAt ? esc(fmtDateTime(o.voidedAt)) : "—"}</td>
+        <td>${o.voidedBy ? esc(o.voidedBy) : "—"}</td>
+      </tr>`)
+      .join("");
+    $("#vdEmpty").hidden = voided.length > 0;
+    $("#vdNote").textContent = `${voided.length} voided order${voided.length === 1 ? "" : "s"} • ${peso(voided.reduce((sum, o) => sum + o.total, 0))} removed from revenue`;
+  }
+
+  $("#thSearch").addEventListener("input", (e) => { thQuery = e.target.value; pageOf.history = 1; renderAnView(); });
+  $("#thPager").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-page]");
+    if (!b || b.disabled) return;
+    pageOf.history = +b.dataset.page;
+    renderAnView();
+  });
+  $("#vdPager").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-page]");
+    if (!b || b.disabled) return;
+    pageOf.voided = +b.dataset.page;
+    renderAnView();
+  });
+
+  // Row buttons in the history table: Receipt (re-open receipt) and Void (open the reason dialog).
+  $("#thBody").addEventListener("click", (e) => {
+    const row = e.target.closest("tr");
     if (!row) return;
     const o = groupOrders(Store.getTransactions()).find((x) => x.orderId === row.dataset.order);
     if (!o) return;
@@ -1329,12 +1442,27 @@ Store.ready.then(function () {
   /* ----- owner-only: add / edit / delete accounts ----- */
   const ac = {
     dlg: $("#accountDialog"), form: $("#acForm"), name: $("#acName"), user: $("#acUser"),
-    email: $("#acEmail"), pass: $("#acPass"), file: $("#acPhoto"), preview: $("#acPreview"), error: $("#acError"),
+    email: $("#acEmail"), pass: $("#acPass"), pass2: $("#acPass2"), file: $("#acPhoto"), preview: $("#acPreview"), error: $("#acError"),
   };
   let acEditingId = null;
   let acPhoto = null; // data URL of a newly chosen photo
+  let acOrigPass = ""; // the password shown when "Edit" was opened (to tell whether the owner changed it)
 
-  function openAccountDialog(id) {
+  // "Show / Hide" buttons next to the password boxes
+  function setPwVisible(input, btn, show) {
+    input.type = show ? "text" : "password";
+    btn.textContent = show ? "Hide" : "Show";
+    btn.setAttribute("aria-pressed", String(show));
+    btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+  }
+  $$(".pw-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.for);
+      setPwVisible(input, btn, input.type === "password");
+    });
+  });
+
+  async function openAccountDialog(id) {
     if (!isOwner) return;
     acEditingId = id || null;
     acPhoto = null;
@@ -1344,14 +1472,38 @@ Store.ready.then(function () {
     $("#acEyebrow").textContent = a ? "EDIT ACCOUNT" : "NEW ACCOUNT";
     $("#acTitle").textContent = a ? "Update Account" : "Add Account";
     $("#acSubmit").textContent = a ? "Save Changes" : "Save Account";
-    $("#acPassLabel").textContent = a ? "New password (leave blank to keep the current one)" : "Password *";
+    $("#acPassLabel").textContent = a ? "Password" : "Password *";
     ac.name.value = a ? a.name : "";
     ac.user.value = a ? a.username : "";
     ac.email.value = a ? a.email : "";
     ac.pass.value = "";
+    ac.pass2.value = "";
+    acOrigPass = "";
+    $$(".pw-toggle").forEach((btn) => setPwVisible(document.getElementById(btn.dataset.for), btn, false));
+    const hint = $("#acPassHint");
+    hint.textContent = a ? "Loading the current password…" : "Use at least 6 characters. Re-type it in the confirm box.";
     ac.preview.src = avatarSrc(a || { email: "new@account" });
     ac.dlg.showModal();
     ac.name.focus();
+    if (!a) return;
+    // Edit: the owner can see the staff member's current password (press Show). Change both boxes to set a new one.
+    let current = null, failed = false;
+    try {
+      current = await Store.getAccountPassword(a.id);
+    } catch {
+      failed = true;
+    }
+    if (acEditingId !== a.id || !ac.dlg.open) return; // the dialog was closed or reopened meanwhile
+    if (current) {
+      acOrigPass = current;
+      ac.pass.value = current;
+      ac.pass2.value = current;
+      hint.textContent = "This is the account’s current password (press Show to read it). To set a new one, change both boxes.";
+    } else {
+      hint.textContent = failed
+        ? "The current password could not be loaded. Leave both boxes empty to keep it, or type a new one."
+        : "The current password is not available for this account (it was created before this feature). Leave both boxes empty to keep it, or type a new one.";
+    }
   }
 
   ac.file.addEventListener("change", () => {
@@ -1383,7 +1535,7 @@ Store.ready.then(function () {
     if (!isOwner) return;
     const err = (m) => (ac.error.textContent = m);
     const name = ac.name.value.trim(), username = ac.user.value.trim();
-    const email = ac.email.value.trim().toLowerCase(), pass = ac.pass.value;
+    const email = ac.email.value.trim().toLowerCase(), pass = ac.pass.value, pass2 = ac.pass2.value;
     const list = Store.getAccounts();
     if (!name) return err("Please enter the full name.");
     if (!/^[\w.-]{3,20}$/.test(username)) return err("Username must be 3–20 letters, numbers, dots, dashes or underscores.");
@@ -1392,6 +1544,8 @@ Store.ready.then(function () {
     if (list.some((a) => a.id !== acEditingId && a.username.toLowerCase() === username.toLowerCase())) return err("That username is already taken.");
     if (!acEditingId && pass.length < 6) return err("Password must be at least 6 characters.");
     if (acEditingId && pass && pass.length < 6) return err("The new password must be at least 6 characters.");
+    if ((pass || pass2) && pass !== pass2) return err("The password and the confirm password do not match.");
+    const newPass = pass && pass !== acOrigPass ? pass : ""; // send a password only when it is new
 
     let ownEmailChanged = false;
     const submitBtn = ac.form.querySelector('[type="submit"]');
@@ -1400,7 +1554,7 @@ Store.ready.then(function () {
       if (acEditingId) {
         const old = list.find((a) => a.id === acEditingId);
         ownEmailChanged = !!old && old.email === me.email && email !== me.email;
-        await Store.updateAccount(acEditingId, { name, username, email, ...(pass ? { password: pass } : {}), ...(acPhoto ? { photo: acPhoto } : {}) });
+        await Store.updateAccount(acEditingId, { name, username, email, ...(newPass ? { password: newPass } : {}), ...(acPhoto ? { photo: acPhoto } : {}) });
       } else {
         await Store.createAccount({ name, username, email, password: pass, ...(acPhoto ? { photo: acPhoto } : {}) });
       }
